@@ -98,39 +98,185 @@
 
  .products-grid {
      display: grid;
-     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-     gap: 20px;
+     grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+     gap: 50px;
      margin-top: 20px;
- }
-
- .product-card {
-     background: rgba(255, 255, 255, 0.1);
-     backdrop-filter: blur(10px);
-     border-radius: 15px;
-     padding: 20px;
-     text-align: center;
-     border: 1px solid rgba(255, 255, 255, 0.2);
-     transition: all 0.3s ease;
-     position: relative;
-     overflow: hidden;
-     min-height: 350px;
-     display: flex;
-     flex-direction: column;
-     align-items: center;
      justify-content: space-between;
  }
 
- .product-card::before {
-     content: '';
-     position: absolute;
-     top: 0;
-     left: 0;
-     right: 0;
-     height: 3px;
-     background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24);
-     background-size: 400% 400%;
-     animation: gradient 3s ease infinite;
+ .flower {
+     height: 200px;
+     width: 200px;
+     margin: 20px auto;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     position: relative;
+     /* Agrega una animación de pulsación */
+     animation: pulsate 2s infinite;
  }
+
+ /*Síguenos en todas las redes como:*/
+ /*Faster Academy*/
+ /*Código: Daniel Arteaga de Faster Academy*/
+ .text-above,
+ .text-below {
+     position: absolute;
+     text-align: center;
+     color: #fff;
+     /* Color del texto */
+     font-size: 25px;
+     /* Tamaño del texto */
+ }
+
+ .text-above {
+     top: -60px;
+     /* Ajusta la posición vertical del texto arriba de la flor */
+ }
+
+ .text-below {
+     bottom: -60px;
+     /* Ajusta la posición vertical del texto debajo de la flor */
+ }
+
+ @keyframes pulsate {
+     0% {
+         transform: scale(1.5);
+     }
+
+     50% {
+         transform: scale(1.6);
+     }
+
+     100% {
+         transform: scale(1.5);
+     }
+ }
+
+ .mid {
+     width: 50px;
+     height: 50px;
+     border-radius: 50%;
+
+     background: radial-gradient(circle, #000, #ff5e00, #000);
+
+     z-index: 4;
+
+     background-size: 5px 5px;
+
+     filter: drop-shadow(0 0 8px #682600);
+ }
+
+ .Petal1 {
+     position: absolute;
+     left: 40px;
+     z-index: 3;
+
+     width: 120px;
+     height: 30px;
+     border-radius: 50%;
+
+     background: radial-gradient(circle, #ff5e00, #ffbb00);
+
+     filter: drop-shadow(0 0 5px #e05200);
+ }
+
+ .Petal1.p1 {
+     transform: rotate(22.5deg);
+ }
+
+ .Petal1.p2 {
+     transform: rotate(67.5deg);
+ }
+
+ .Petal1.p3 {
+     transform: rotate(110.5deg);
+ }
+
+ .Petal1.p4 {
+     transform: rotate(157.5deg);
+ }
+
+ .Petal2 {
+     position: absolute;
+     left: 0;
+     z-index: 2;
+
+     width: 200px;
+     height: 40px;
+     border-radius: 50%;
+
+     background: radial-gradient(circle, #ff5e00, #fbd702);
+
+     filter: drop-shadow(0 0 5px #e05200);
+ }
+
+ .Petal2.p1 {
+     rotate: 0deg;
+ }
+
+ .Petal2.p2 {
+     transform: rotate(90deg);
+ }
+
+ .Petal2.p3 {
+     transform: rotate(45deg);
+ }
+
+ .Petal2.p4 {
+     transform: rotate(135deg);
+ }
+
+ .Petal3 {
+     position: absolute;
+     left: 0px;
+     z-index: 1;
+
+     width: 200px;
+     height: 40px;
+     border-radius: 50%;
+
+     background: radial-gradient(circle, #ff5e00, #fbd702);
+
+     filter: drop-shadow(0 0 2px #fbd702);
+
+ }
+
+ /*Síguenos en todas las redes como:*/
+ /*Faster Academy*/
+ /*Código: Daniel Arteaga de Faster Academy*/
+ .Petal3.p1 {
+     transform: rotate(22.5deg);
+ }
+
+ .Petal3.p2 {
+     transform: rotate(67.5deg);
+ }
+
+ .Petal3.p3 {
+     transform: rotate(110.5deg);
+ }
+
+ .Petal3.p4 {
+     transform: rotate(157.5deg);
+ }
+
+/* FIXED: Product card positioning and sizing */
+.product-card {
+    border-radius: 30px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    width: 350px;
+    height: 430px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto; /* Center the card within its grid cell */
+}
+
 
  @keyframes gradient {
      0% {
@@ -146,203 +292,6 @@
      }
  }
 
- .product-card:hover {
-     transform: translateY(-5px);
-     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
- }
-
- /* Estilos para la flor - contenidos dentro de cada tarjeta */
- .flower-container {
-     width: 140px;
-     height: 200px;
-     position: relative;
-     margin: 10px auto;
- }
-
- .pot {
-     background: #ee7d15;
-     position: relative;
- }
-
- .pot>div {
-     position: absolute;
- }
-
- .pot-bot {
-     width: 100px;
-     height: 100px;
- }
-
- .pot-bot::before {
-     content: "";
-     position: absolute;
-     top: 0;
-     left: -15px;
-     border-left: 15px solid transparent;
-     border-right: 0px solid transparent;
-     border-top: 100px solid #ee7d15;
- }
-
- .pot-bot::after {
-     content: "";
-     position: absolute;
-     top: 0;
-     right: -15px;
-     border-left: 0px solid transparent;
-     border-right: 15px solid transparent;
-     border-top: 100px solid #ee7d15;
- }
-
- .pot-top {
-     width: 140px;
-     height: 25px;
-     top: -25px;
-     left: 50%;
-     margin-left: -70px;
- }
-
- .pot-top::before {
-     content: "";
-     position: absolute;
-     left: -5px;
-     top: 0;
-     border-left: 5px solid transparent;
-     border-right: 0px solid transparent;
-     border-top: 25px solid #ee7d15;
- }
-
- .pot-top::after {
-     content: "";
-     position: absolute;
-     right: -5px;
-     top: 0;
-     border-right: 5px solid transparent;
-     border-left: 0px solid transparent;
-     border-top: 25px solid #ee7d15;
- }
-
- .pot-shadow {
-     z-index: 3;
-     width: 125px;
-     height: 10px;
-     background: rgba(220, 84, 0, 0.2);
-     left: 50%;
-     top: 0;
-     margin-left: -62.5px;
- }
-
- .shadow {
-     background: rgba(220, 84, 0, 0.1);
-     z-index: -1;
-     bottom: -5px;
-     left: 50%;
-     margin-left: -60px;
-     width: 120px;
-     height: 10px;
-     border-radius: 120px / 10px;
- }
-
- .plant {
-     height: 120px;
-     background: #00c975;
-     width: 16px;
-     position: absolute;
-     bottom: 0;
-     left: 50%;
-     margin-left: -8px;
-     border-radius: 16px 16px 0 0;
- }
-
- .plant>div {
-     position: absolute;
- }
-
- .plant::before {
-     content: "";
-     position: absolute;
-     height: 115px;
-     width: 4px;
-     right: 0;
-     bottom: 0;
-     background: rgba(60, 188, 131, 0.5);
-     border-radius: 0 30px 0 0;
- }
-
- .head {
-     width: 50px;
-     height: 50px;
-     position: absolute;
-     left: 50%;
-     top: -40px;
-     margin-left: -25px;
-     border-radius: 50px;
-     background: #fda342;
- }
-
- .face {
-     background: #a3430c;
-     width: 20px;
-     height: 20px;
-     border-radius: 25px;
-     position: absolute;
-     margin-top: -10px;
-     margin-left: -10px;
-     top: 50%;
-     left: 50%;
- }
-
- .petals {
-     list-style: none;
-     padding: 0;
-     margin: 0;
-     position: relative;
-     width: 100%;
-     height: 100%;
- }
-
- .petals li {
-     list-style: none;
-     width: 35px;
-     height: 20px;
-     position: absolute;
-     border-radius: 50px 10px 50px 10px;
-     background: #facb3d;
-     top: 50%;
-     left: 50%;
-     transform-origin: 0 0;
- }
-
- .petals li:nth-child(1) {
-     transform: translate(-50%, -50%) rotate(0deg) translate(25px, 0);
- }
-
- .petals li:nth-child(2) {
-     transform: translate(-50%, -50%) rotate(45deg) translate(25px, 0);
- }
-
- .petals li:nth-child(3) {
-     transform: translate(-50%, -50%) rotate(90deg) translate(25px, 0);
- }
-
- .petals li:nth-child(4) {
-     transform: translate(-50%, -50%) rotate(135deg) translate(25px, 0);
- }
-
- .petals li:nth-child(5) {
-     transform: translate(-50%, -50%) rotate(180deg) translate(25px, 0);
- }
-
- .petals li:nth-child(6) {
-     transform: translate(-50%, -50%) rotate(225deg) translate(25px, 0);
- }
-
- .petals li:nth-child(7) {
-     transform: translate(-50%, -50%) rotate(270deg) translate(25px, 0);
- }
-
- .petals li:nth-child(8) {
-     transform: translate(-50%, -50%) rotate(315deg) translate(25px, 0);
- }
 
  .product-info {
      margin-top: 15px;
@@ -353,7 +302,7 @@
      color: white;
      font-size: 1.2em;
      font-weight: bold;
-     margin-bottom: 10px;
+     margin-top: 40px;
      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
  }
 

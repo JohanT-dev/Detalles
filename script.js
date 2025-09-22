@@ -3,7 +3,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyDjElCiSGJNkMMhlDruX6N9FiTYUay0hr0",
     authDomain: "fir-proyect-johan.firebaseapp.com",
     projectId: "fir-proyect-johan",
-    storageBucket: "fir-proyect-johan.firebasestorage.app",
+    storageBucket: "fir-proyect-johan.rebasestorage.app",
     messagingSenderId: "1088410162010",
     appId: "1:1088410162010:web:5284e59b95fc1710bc1963",
     measurementId: "G-K4FTJDRMJB"
@@ -12,14 +12,26 @@ const firebaseConfig = {
 // Inicializar Firebase
 let db;
 let isFirebaseConfigured = false;
+let isAppInitialized = false;
 
-try {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-    isFirebaseConfigured = true;
-} catch (error) {
-    console.warn('Firebase no configurado correctamente, usando almacenamiento local');
-    isFirebaseConfigured = false;
+async function initializeFirebase() {
+    try {
+        if (!isAppInitialized) {
+            firebase.initializeApp(firebaseConfig);
+            isAppInitialized = true;
+        }
+        db = firebase.firestore();
+        
+        // Hacer una pequeña prueba de conexión
+        await db.collection('products').limit(1).get();
+        isFirebaseConfigured = true;
+        console.log('✅ Firebase configurado correctamente');
+        return true;
+    } catch (error) {
+        console.warn('❌ Firebase no configurado correctamente:', error);
+        isFirebaseConfigured = false;
+        return false;
+    }
 }
 
 // Variables globales
@@ -34,10 +46,10 @@ const loadingDiv = document.getElementById('loading');
 // Función para mostrar mensajes
 function showMessage(message, type = 'success') {
     messagesDiv.innerHTML = `
-                <div class="${type}-message">
-                    ${message}
-                </div>
-            `;
+        <div class="${type}-message">
+            ${message}
+        </div>
+    `;
     setTimeout(() => {
         messagesDiv.innerHTML = '';
     }, 3000);
@@ -51,39 +63,39 @@ function generateId() {
 // Función para crear una tarjeta de producto
 function createProductCard(product) {
     return `
-                <div class="product-card" data-id="${product.id}">
-<div id="position" class="sunflower">
-	<div class="head">
-	    <div id="eye-1" class="eye"></div>
-	    <div id="eye-2" class="eye"></div>
-	    <div class="mouth"></div>
-	</div>
-	<div class="petals"></div>
-	<div class="trunk">
-		<div class="left-branch"></div>
-		<div class="right-branch"></div>
-	</div>
-	<div class="vase"></div>
-</div>
-                    
-                    <div class="product-info">
-                        <div class="product-name">${product.name}</div>
-            
-                    </div>
-                </div>
-            `;
+        <div class="product-card" data-id="${product.id}">
+            <div class="flower">
+                <div class="mid"></div>
+                <div class="Petal1 p1"></div>
+                <div class="Petal1 p2"></div>
+                <div class="Petal1 p3"></div>
+                <div class="Petal1 p4"></div>
+                <div class="Petal2 p1"></div>
+                <div class="Petal2 p2"></div>
+                <div class="Petal2 p3"></div>
+                <div class="Petal2 p4"></div>
+                <div class="Petal3 p1"></div>
+                <div class="Petal3 p2"></div>
+                <div class="Petal3 p3"></div>
+                <div class="Petal3 p4"></div>
+            </div>
+            <div class="product-info">
+                <div class="product-name">${product.name}</div>
+            </div>
+        </div>
+    `;
 }
 
 // Función para renderizar productos
 function renderProducts() {
     if (products.length === 0) {
         productsGrid.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.7); padding: 40px;">
-                        <div style="font-size: 4em; margin-bottom: 20px;">🌻</div>
-                        <h3>No hay productos aún</h3>
-                        <p>¡Añade tu primer producto usando el formulario de arriba!</p>
-                    </div>
-                `;
+            <div style="grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.7); padding: 40px;">
+                <div style="font-size: 4em; margin-bottom: 20px;">🌻</div>
+                <h3>No hay flores aún en el jardín</h3>
+                <p>Es que las flores estan caras...</p>
+            </div>
+        `;
         return;
     }
 
@@ -102,10 +114,10 @@ async function addProduct(name) {
         try {
             await db.collection('products').doc(newProduct.id).set(newProduct);
             products.push(newProduct);
-            showMessage(` Felicidades "${name}" tu flor se ha añadido al jardín`);
+            showMessage(`🌻 Felicidades "${name}", tu flor se ha añadido al jardín`);
         } catch (error) {
             console.error('Error añadiendo producto:', error);
-            showMessage(`Lo siento parace que tengo este problema ${error.message}`, 'no puedo agregar tu flor');
+            showMessage(`❌ Lo siento, parece que tengo este problema: ${error.message}`, 'error');
             return;
         }
     } else {
@@ -113,66 +125,149 @@ async function addProduct(name) {
         products.push(newProduct);
         try {
             localStorage.setItem('products', JSON.stringify(products));
-            showMessage(`Felicidades "${name}" tu flor se ha añadido al jardín`);
+            showMessage(`🌻 Felicidades "${name}", tu flor se ha añadido al jardín (modo local)`);
         } catch (error) {
-            showMessage(`Lo siento parace que tengo este problema ${error.message}`, 'no puedo agregar tu flor');
+            showMessage(`❌ Lo siento, parece que tengo este problema: ${error.message}`, 'error');
         }
     }
-
-    renderProducts();
 }
 
-// Función para cargar productos
-async function loadProducts() {
+// Función mejorada para cargar productos
+async function loadProducts(forceReload = false) {
+    // Mostrar loading
     loadingDiv.style.display = 'block';
-
-    if (isFirebaseConfigured) {
-        try {
+    
+    try {
+        if (isFirebaseConfigured) {
+            console.log('🔄 Cargando productos desde Firebase...');
             const snapshot = await db.collection('products').orderBy('createdAt', 'desc').get();
             products = [];
+            
             snapshot.forEach(doc => {
                 products.push({ id: doc.id, ...doc.data() });
             });
-        } catch (error) {
-            console.error('Error cargando productos:', error);
-            showMessage(`❌ Error al cargar productos: ${error.message}`, 'error');
-        }
-    } else {
-        // Cargar desde localStorage como fallback
-        try {
-            const stored = localStorage.getItem('products');
-            products = stored ? JSON.parse(stored) : [];
-            if (!stored) {
-                showMessage('⚠️ Usando almacenamiento local (Firebase no configurado)', 'error');
+            
+            console.log(`✅ Se cargaron ${products.length} productos desde Firebase`);
+            
+            // Guardar en localStorage como respaldo
+            try {
+                localStorage.setItem('products', JSON.stringify(products));
+            } catch (error) {
+                console.warn('No se pudo guardar respaldo en localStorage');
             }
-        } catch (error) {
-            products = [];
-            showMessage('⚠️ Error al cargar datos locales', 'error');
+            
+        } else {
+            // Fallback: cargar desde localStorage
+            console.log('📱 Cargando productos desde almacenamiento local...');
+            const savedProducts = localStorage.getItem('products');
+            if (savedProducts) {
+                products = JSON.parse(savedProducts);
+                console.log(`✅ Se cargaron ${products.length} productos desde localStorage`);
+            } else {
+                products = [];
+                console.log('ℹ️ No hay productos guardados localmente');
+            }
         }
+        
+    } catch (error) {
+        console.error('❌ Error cargando productos:', error);
+        showMessage(`❌ Error al cargar el jardín: ${error.message}`, 'error');
+        
+        // Intentar cargar desde localStorage como último recurso
+        try {
+            const savedProducts = localStorage.getItem('products');
+            if (savedProducts) {
+                products = JSON.parse(savedProducts);
+                showMessage('⚠️ Cargando jardín desde respaldo local', 'warning');
+            }
+        } catch (localError) {
+            products = [];
+        }
+    } finally {
+        loadingDiv.style.display = 'none';
+        renderProducts();
     }
+}
 
-    loadingDiv.style.display = 'none';
-    renderProducts();
+// Función para inicializar la aplicación
+async function initializeApp() {
+    console.log('🚀 Inicializando aplicación...');
+    
+    // Intentar inicializar Firebase
+    const firebaseReady = await initializeFirebase();
+    
+    // Cargar productos
+    await loadProducts();
+    
+    // Si Firebase está disponible, configurar listener en tiempo real (opcional)
+    if (firebaseReady) {
+        setupRealtimeListener();
+    }
+    
+    console.log('✅ Aplicación inicializada correctamente');
+}
+
+// Función para configurar listener en tiempo real (opcional)
+function setupRealtimeListener() {
+    if (!isFirebaseConfigured) return;
+    
+    let isInitialLoad = true;
+    
+    // Escuchar cambios en tiempo real
+    db.collection('products').orderBy('createdAt', 'desc')
+        .onSnapshot((snapshot) => {
+            // Ignorar la primera carga para evitar duplicados
+            if (isInitialLoad) {
+                isInitialLoad = false;
+                return;
+            }
+            
+            const hasChanges = snapshot.docChanges().length > 0;
+            if (hasChanges) {
+                console.log('🔄 Detectados cambios en Firebase, actualizando...');
+                products = [];
+                snapshot.forEach(doc => {
+                    products.push({ id: doc.id, ...doc.data() });
+                });
+                renderProducts();
+                
+                // Actualizar localStorage
+                try {
+                    localStorage.setItem('products', JSON.stringify(products));
+                } catch (error) {
+                    console.warn('No se pudo actualizar localStorage');
+                }
+            }
+        }, (error) => {
+            console.error('Error en listener de Firebase:', error);
+        });
 }
 
 // Event listeners
 productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    // Prevenir múltiples submissions
+    if (addBtn.disabled) return;
 
     const name = productNameInput.value.trim();
     if (!name) {
-        showMessage('❌ Por favor, introduce un nombre para el producto', 'error');
+        showMessage('❌ Por favor, introduce tu nombre', 'error');
         return;
     }
 
     addBtn.disabled = true;
-    addBtn.textContent = '⏳ Añadiendo...';
+    addBtn.textContent = '⏳ Creando flor...';
 
-    await addProduct(name);
-
-    productNameInput.value = '';
-    addBtn.disabled = false;
-    addBtn.textContent = '➕ Añadir Producto';
+    try {
+        await addProduct(name);
+        productNameInput.value = '';
+    } catch (error) {
+        console.error('Error en submit:', error);
+    } finally {
+        addBtn.disabled = false;
+        addBtn.textContent = 'Crea tu flor';
+    }
 });
 
 // Validación en tiempo real
@@ -181,28 +276,20 @@ productNameInput.addEventListener('input', (e) => {
     addBtn.disabled = value.length === 0;
 });
 
-// Hacer deleteProduct global
-window.deleteProduct = deleteProduct;
+// Función para recargar datos manualmente
+window.reloadGarden = async function() {
+    await loadProducts(true);
+};
 
-// Cargar productos al iniciar
+// Inicializar la aplicación cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    loadProducts();
+    initializeApp();
 });
 
-// Añadir algunos productos de ejemplo si no hay ninguno (solo para demostración)
-setTimeout(() => {
-    if (products.length === 0 && !isFirebaseConfigured) {
-        const exampleProducts = [
-            { id: 'demo1', name: 'Camiseta Básica', createdAt: new Date().toISOString() },
-            { id: 'demo2', name: 'Pantalón Vaquero', createdAt: new Date().toISOString() },
-            { id: 'demo3', name: 'Zapatillas Deportivas', createdAt: new Date().toISOString() }
-        ];
-        products = exampleProducts;
-        try {
-            localStorage.setItem('products', JSON.stringify(products));
-        } catch (error) {
-            console.warn('No se pudo guardar en localStorage');
-        }
-        renderProducts();
+// Manejar visibilidad de la página para recargar cuando el usuario vuelve
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && isFirebaseConfigured) {
+        console.log('👁️ Usuario regresó, verificando actualizaciones...');
+        loadProducts();
     }
-}, 1000);
+});

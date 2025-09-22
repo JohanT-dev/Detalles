@@ -1,4 +1,4 @@
-//Configuración de Firebase (REEMPLAZA CON TUS CREDENCIALES)
+// Configuración de Firebase (REEMPLAZA CON TUS CREDENCIALES)
 const firebaseConfig = {
     apiKey: "AIzaSyDjElCiSGJNkMMhlDruX6N9FiTYUay0hr0",
     authDomain: "fir-proyect-johan.firebaseapp.com",
@@ -31,7 +31,6 @@ const addBtn = document.getElementById('addBtn');
 const messagesDiv = document.getElementById('messages');
 const loadingDiv = document.getElementById('loading');
 
-
 // Función para mostrar mensajes
 function showMessage(message, type = 'success') {
     messagesDiv.innerHTML = `
@@ -44,37 +43,33 @@ function showMessage(message, type = 'success') {
     }, 3000);
 }
 
+// Función para generar ID único
+function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
 
 // Función para crear una tarjeta de producto
 function createProductCard(product) {
     return `
                 <div class="product-card" data-id="${product.id}">
-<div class="container">
-  <!-- Plant pot -->
-  <div class="pot pot-bot">
-    <div class="shadow"></div>
-    <div class="pot pot-shadow"></div>
-    <div class="pot pot-top"></div>
-    
-    <!-- Plant -->
-    <div class="plant">
-      <div class="head">
-      <!--div class="face"></div-->
-      <ul>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-        </ul>
-       </div>
-    </div>
-    
-  </div>
+<div id="position" class="sunflower">
+	<div class="head">
+	    <div id="eye-1" class="eye"></div>
+	    <div id="eye-2" class="eye"></div>
+	    <div class="mouth"></div>
+	</div>
+	<div class="petals"></div>
+	<div class="trunk">
+		<div class="left-branch"></div>
+		<div class="right-branch"></div>
+	</div>
+	<div class="vase"></div>
 </div>
+                    
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+            
+                    </div>
                 </div>
             `;
 }
@@ -84,7 +79,7 @@ function renderProducts() {
     if (products.length === 0) {
         productsGrid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.7); padding: 40px;">
-                        <div style="font-size: 4em; margin-bottom: 20px;">📦</div>
+                        <div style="font-size: 4em; margin-bottom: 20px;">🌻</div>
                         <h3>No hay productos aún</h3>
                         <p>¡Añade tu primer producto usando el formulario de arriba!</p>
                     </div>
@@ -98,51 +93,30 @@ function renderProducts() {
 // Función para añadir producto
 async function addProduct(name) {
     const newProduct = {
+        id: generateId(),
         name: name.trim(),
-
+        createdAt: new Date().toISOString()
     };
 
     if (isFirebaseConfigured) {
         try {
             await db.collection('products').doc(newProduct.id).set(newProduct);
             products.push(newProduct);
-            showMessage(`✅ Producto "${name}" añadido correctamente`);
+            showMessage(` Felicidades "${name}" tu flor se ha añadido al jardín`);
         } catch (error) {
             console.error('Error añadiendo producto:', error);
-            showMessage(`❌ Error al añadir producto: ${error.message}`, 'error');
+            showMessage(`Lo siento parace que tengo este problema ${error.message}`, 'no puedo agregar tu flor');
             return;
         }
     } else {
         // Almacenamiento local como fallback
         products.push(newProduct);
-        localStorage.setItem('products', JSON.stringify(products));
-        showMessage(`✅ Producto "${name}" añadido localmente`);
-    }
-
-    renderProducts();
-}
-
-// Función para eliminar producto
-async function deleteProduct(productId) {
-    if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-        return;
-    }
-
-    if (isFirebaseConfigured) {
         try {
-            await db.collection('products').doc(productId).delete();
-            products = products.filter(p => p.id !== productId);
-            showMessage('✅ Producto eliminado correctamente');
+            localStorage.setItem('products', JSON.stringify(products));
+            showMessage(`Felicidades "${name}" tu flor se ha añadido al jardín`);
         } catch (error) {
-            console.error('Error eliminando producto:', error);
-            showMessage(`❌ Error al eliminar producto: ${error.message}`, 'error');
-            return;
+            showMessage(`Lo siento parace que tengo este problema ${error.message}`, 'no puedo agregar tu flor');
         }
-    } else {
-        // Almacenamiento local como fallback
-        products = products.filter(p => p.id !== productId);
-        localStorage.setItem('products', JSON.stringify(products));
-        showMessage('✅ Producto eliminado localmente');
     }
 
     renderProducts();
@@ -165,10 +139,15 @@ async function loadProducts() {
         }
     } else {
         // Cargar desde localStorage como fallback
-        const stored = localStorage.getItem('products');
-        products = stored ? JSON.parse(stored) : [];
-        if (!stored) {
-            showMessage('⚠️ Usando almacenamiento local (Firebase no configurado)', 'error');
+        try {
+            const stored = localStorage.getItem('products');
+            products = stored ? JSON.parse(stored) : [];
+            if (!stored) {
+                showMessage('⚠️ Usando almacenamiento local (Firebase no configurado)', 'error');
+            }
+        } catch (error) {
+            products = [];
+            showMessage('⚠️ Error al cargar datos locales', 'error');
         }
     }
 
@@ -214,12 +193,16 @@ document.addEventListener('DOMContentLoaded', () => {
 setTimeout(() => {
     if (products.length === 0 && !isFirebaseConfigured) {
         const exampleProducts = [
-            { id: 'demo1', name: 'Camiseta Básica', icon: '👕', createdAt: new Date().toISOString() },
-            { id: 'demo2', name: 'Pantalón Vaquero', icon: '👖', createdAt: new Date().toISOString() },
-            { id: 'demo3', name: 'Zapatillas Deportivas', icon: '👟', createdAt: new Date().toISOString() }
+            { id: 'demo1', name: 'Camiseta Básica', createdAt: new Date().toISOString() },
+            { id: 'demo2', name: 'Pantalón Vaquero', createdAt: new Date().toISOString() },
+            { id: 'demo3', name: 'Zapatillas Deportivas', createdAt: new Date().toISOString() }
         ];
         products = exampleProducts;
-        localStorage.setItem('products', JSON.stringify(products));
+        try {
+            localStorage.setItem('products', JSON.stringify(products));
+        } catch (error) {
+            console.warn('No se pudo guardar en localStorage');
+        }
         renderProducts();
     }
 }, 1000);
